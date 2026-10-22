@@ -90,7 +90,7 @@ $ node bin/preflight.mjs path/to/paper.pdf
 [3] render → ContentBlock[]
 [5] fallback compiler output == host defineTool output   (both tools)
 [4] end-to-end: extract + render on a real PDF
-结果: 19 通过 / 0 失败
+结果: 23 通过 / 0 失败        # 有宿主时；CI（无宿主）为 17 通过 / 0 失败 / 1 跳过
 ```
 
 Step **[5]** is the important one. When the host's `dsh-tools` cannot be resolved, the plugin
@@ -169,13 +169,22 @@ npm test           # unit: page regex, config validation, schema compile + host 
 npm run preflight  # registration-time mirror; pass a PDF path for the end-to-end stage
 ```
 
-CI runs both on Node 20 and 22 with a small checked-in fixture.
+CI runs both on **Node 22 and 24** with a small checked-in fixture. `bin/preflight.mjs` degrades to
+offline checks when no DSH runtime is present (that is the CI case): host-dependent stages are
+skipped, never failed.
 
 ---
 
 ## License
 
 MIT — see [LICENSE](./LICENSE).
+
+Third-party components are **not** vendored: the only runtime dependency is
+[`pdfjs-dist`](https://github.com/mozilla/pdf.js) (**Apache-2.0**), installed by npm and subject to its
+own license. Our `bin/preflight.mjs` intentionally *mirrors* the registration-time validation of
+`@deepseek-ai/dsh-tools` (MIT) so that a plugin author can catch a host-fatal definition problem before
+restarting a host; it is an independent implementation, not copied code. See
+[`THIRD-PARTY-NOTICES.md`](./THIRD-PARTY-NOTICES.md).
 
 ---
 

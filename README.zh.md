@@ -33,7 +33,7 @@ YAML
 ## 自检（不需要 DSH，不需要重启）
 
 ```bash
-node bin/selftest.mjs /path/to/paper.pdf 1-3
+node bin/preflight.mjs /path/to/paper.pdf   # 注册期校验 + 端到端
 ```
 
 ## 设计约束

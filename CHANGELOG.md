@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.1 — 2026-10-22
+
+Documentation and compliance pass (no behaviour change).
+
+### Added
+- `THIRD-PARTY-NOTICES.md`: pdfjs-dist is Apache-2.0 and **not vendored**; `bin/preflight.mjs`
+  mirrors (does not copy) the MIT-licensed `@deepseek-ai/dsh-tools` validation.
+
+### Changed
+- README: corrected stale numbers (preflight now 23 with a host / 17+1 in CI; CI runs Node 22/24,
+  not 20/22), added a Requirements link for Node ≥ 22.13, and a License section covering the
+  third-party dependency.
+- Removed `bin/selftest.mjs`: its end-to-end stage is covered by `bin/preflight.mjs [4]`, and two
+  overlapping entry points invited drift. `README.zh.md` now points at preflight.
+- `package.json#files` now includes `CHANGELOG.md` and `THIRD-PARTY-NOTICES.md` (the published tarball
+  was missing both).
+
 ## 0.3.0 — 2026-10-22
 
 ### Changed

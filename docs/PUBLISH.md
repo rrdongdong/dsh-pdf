@@ -43,7 +43,7 @@ git commit -m "feat: pdf_fetch + pdf_extract tools for DSH (CID/ObjStm-safe)
 - pdf_fetch: Range resume + retries + %%EOF verification
 - config: cacheDir / maxPdfBytes / defaultMaxChars / fetchAttempts / fetchPerAttemptTimeoutMs
 - bin/preflight.mjs: mirrors ToolRuntime.register() before a host restart
-- 24 unit tests, CI on Node 20/22"
+- 26 unit tests, CI on Node 22/24"
 ```
 
 ## 3. 建远端并推送
