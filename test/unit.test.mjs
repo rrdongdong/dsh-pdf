@@ -10,6 +10,7 @@ import os from 'node:os';
 
 import {
   DEFAULTS,
+  assertRuntimeSupported,
   resolveConfig,
   parsePages,
   compileParameters,
@@ -171,4 +172,21 @@ test('fetchPdf: unreachable URL reports complete:false', async () => {
 
 test('fetchPdf: non-http protocol is rejected', async () => {
   await assert.rejects(() => fetchPdf('file:///etc/passwd'), /PDF_BAD_URL/);
+});
+
+/* -------------------------------------------------------------- runtime */
+
+test('assertRuntimeSupported: passes on a modern runtime', () => {
+  assert.doesNotThrow(() => assertRuntimeSupported());
+});
+
+test('assertRuntimeSupported: named error when Promise.withResolvers is missing', () => {
+  const saved = Promise.withResolvers;
+  // eslint-disable-next-line no-delete-var
+  delete Promise.withResolvers;
+  try {
+    assert.throws(() => assertRuntimeSupported(), /NODE_TOO_OLD: pdfjs-dist 6\.x requires Node >= 22\.13/);
+  } finally {
+    Promise.withResolvers = saved;
+  }
 });

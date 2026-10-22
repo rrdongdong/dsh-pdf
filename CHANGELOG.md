@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.3.0 — 2026-10-22
+
+### Changed
+- **Requires Node ≥ 22.13.** `pdfjs-dist@6` needs `Promise.withResolvers`, which Node 20 lacks.
+  CI now runs Node 22/24 instead of 20/22 (the failing cell was a test-matrix bug, not a code bug).
+  `engines.node` was declared loosely before, so `npm` never warned.
+
+### Added
+- `assertRuntimeSupported()` — raises a named `NODE_TOO_OLD` error at plugin load on an unsupported
+  runtime, instead of a cryptic failure deep inside pdfjs. Called from both `apply()` and
+  `loadPdfjs()`; injectable `versions` argument for tests. Covered by two unit tests.
+- `bin/preflight.mjs` is now **host-optional**: when no DSH runtime is resolvable (CI, plain clone)
+  the host-mirroring stages are *skipped* rather than crashing, and offline equivalents run instead.
+
+### Fixed
+- `package-lock.json` regenerated against `registry.npmjs.org`; it had been generated on a host
+  pointing at an internal mirror, so CI failed with `ENOTFOUND` before running a single test.
+
 ## 0.2.1 — 2026-10-21
 
 ### Fixed

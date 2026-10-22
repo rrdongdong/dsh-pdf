@@ -36,6 +36,12 @@ characters from the first 3 pages, 100 % printable.
 
 ---
 
+## Requirements
+
+**Node ≥ 22.13.** `pdfjs-dist@6` needs `Promise.withResolvers`; on an older runtime the plugin raises
+a named `NODE_TOO_OLD` error instead of failing deep inside pdfjs. Consumers stuck on Node 20 can pin
+`pdfjs-dist@4.x` (same CID/ToUnicode support, older runtime floor).
+
 ## Install (DSH profile)
 
 ```bash
