@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.2 — 2026-10-22
+
+### Changed
+- Copyright holder in `LICENSE` is now **rrdongdong** (the publishing handle) instead of the personal
+  name used in 0.3.3; `package.json#author` matches. The MIT notice stays valid — only the named
+  holder changed.
+
 ## 0.4.1 — 2026-10-22
 
 ### Changed

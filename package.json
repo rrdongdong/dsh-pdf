@@ -1,6 +1,6 @@
 {
   "name": "@rrdongdong/dsh-pdf",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "PDF text extraction that survives CID/ObjStm fonts (CVPR/IEEE PDFs) — DSH/Cordis tools",
   "keywords": [
     "dsh",
@@ -13,7 +13,7 @@
     "objstm",
     "tool"
   ],
-  "author": "yedongheng",
+  "author": "rrdongdong",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
