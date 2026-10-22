@@ -1,0 +1,60 @@
+{
+  "name": "dsh-tool-pdf",
+  "version": "0.2.1",
+  "description": "DSH/Cordis tools for reading papers: resumable PDF download + text extraction that survives subsetted CID fonts and compressed object streams",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js"
+  },
+  "dependencies": {
+    "pdfjs-dist": "6.4.299"
+  },
+  "keywords": [
+    "dsh",
+    "cordis",
+    "deepseek-harness",
+    "pdf",
+    "pdfjs",
+    "cid-font",
+    "toUnicode",
+    "objstm",
+    "tool"
+  ],
+  "license": "MIT",
+  "files": [
+    "lib/",
+    "bin/",
+    "docs/",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "preflight": "node bin/preflight.mjs",
+    "preflight:pdf": "node bin/preflight.mjs ./fixtures/sample.pdf"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rrdongdong/dsh-tool-pdf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rrdongdong/dsh-tool-pdf/issues"
+  },
+  "homepage": "https://github.com/rrdongdong/dsh-tool-pdf#readme",
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
