@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+          registry-url: https://registry.npmjs.org
       - run: npm ci
       - name: Unit tests
         run: npm test

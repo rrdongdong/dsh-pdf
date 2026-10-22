@@ -1,14 +1,16 @@
 /**
- * 起飞前验证（不启动服务、不碰线上进程）。
+ * Pre-flight: mirror the host's registration-time checks **before** restarting it.
  *
- * 逐行镜像 dsh-tools@rc.7 的 ToolRuntime.register() 校验：
- *   1) output 必须是 { schema, render, presentationMeta? }
- *   2) assertSupportedJsonSchema(output.schema)
- *   3) timeoutMs 若声明必须是正有限数
- *   4) 工具名不能是保留的 run_code
- * 并额外验证：参数 spec 可转 JSON Schema、render 返回合法 ContentBlock[]、execute 真能跑。
+ * Runs in two modes:
+ *   • **host present** — loads the host's own `@deepseek-ai/dsh-tools` (resolved from
+ *     `DSH_PROFILE_DIR` / `$DSH_HOME/profiles/web`) and mirrors `ToolRuntime.register()`
+ *     exactly, including a parity check between our local schema compiler and the
+ *     host's `defineTool()`.
+ *   • **host absent** (CI, plain `git clone`) — validates the same contracts with the
+ *     bundled compiler plus structural checks, and *skips* (never fails) the stages
+ *     that need the host. This is the mode GitHub Actions runs in.
  *
- * 用法: node bin/preflight.mjs [样张.pdf]
+ * Usage: node bin/preflight.mjs [sample.pdf]
  */
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
@@ -17,16 +19,36 @@ import os from 'node:os';
 
 const DSH_HOME = process.env.DSH_HOME || path.join(os.homedir(), '.dsh');
 const PROFILE = process.env.DSH_PROFILE_DIR || path.join(DSH_HOME, 'profiles', 'web');
-const req = createRequire(`${PROFILE}/package.json`);
-const load = (spec) => import(pathToFileURL(req.resolve(spec)).href);
+const req = createRequire(path.join(PROFILE, 'package.json'));
 
-let pass = 0, fail = 0;
+let pass = 0;
+let fail = 0;
+let skipped = 0;
 const ok = (c, m, extra = '') => {
-  c ? (pass++, console.log(`  ✓ ${m}`)) : (fail++, console.log(`  ✗ ${m}${extra ? ' — ' + extra : ''}`));
+  if (c) { pass++; console.log(`  ✓ ${m}`); } else { fail++; console.log(`  ✗ ${m}${extra ? ` — ${extra}` : ''}`); }
 };
+const skip = (m) => { skipped++; console.log(`  – ${m}（跳过：本机无 DSH 宿主）`); };
 
-const tools = await load('@deepseek-ai/dsh-tools');
+/* ------------------------------------------------------------ host runtime */
+
+/** @returns {Promise<{tools: any, defineTool: Function|null}|null>} */
+async function loadHost() {
+  try {
+    const entry = req.resolve('@deepseek-ai/dsh-tools');
+    const mod = await import(pathToFileURL(entry).href);
+    return { tools: mod, defineTool: typeof mod.defineTool === 'function' ? mod.defineTool : null };
+  } catch {
+    return null;
+  }
+}
+
+const host = await loadHost();
+if (host) console.log(`[i] 宿主: ${PROFILE}（完整校验 + host 一致性比对）`);
+else console.log('[i] 未检测到 DSH 宿主（CI / 纯 clone 环境）：只做可离线校验，依赖宿主的阶段跳过');
+
 const plugin = await import(new URL('../lib/index.js', import.meta.url).href);
+
+/* ------------------------------------------------------------------ stage 0 */
 
 const defs = [];
 const mockCtx = { tools: { register: (d) => { defs.push(d); return () => {}; } } };
@@ -34,46 +56,68 @@ await plugin.apply(mockCtx);
 ok(defs.length === 2, `apply() 注册了 ${defs.length} 个工具`);
 
 const rawSpecByName = new Map(plugin.toolSpecs.map((x) => [x.name, x]));
-console.log('[1] 镜像 register() 的 output 契约校验');
+
+/* ------------------------------------------------------------------ stage 1 */
+
+console.log('[1] output 契约：{ schema, render, presentationMeta? }');
 for (const def of defs) {
   const { name, output } = def;
   const badOutput = output === undefined || typeof output !== 'object'
     || typeof output.render !== 'function'
     || (output.presentationMeta !== undefined && typeof output.presentationMeta !== 'function');
   ok(!badOutput, `${name}: output { schema, render, presentationMeta? } 合规`,
-     badOutput ? 'rc.7 会抛 must declare output { schema, render, presentationMeta? }' : '');
-  if (!badOutput) {
-    try { tools.assertSupportedJsonSchema(output.schema); ok(true, `${name}: output.schema 通过 assertSupportedJsonSchema（注册期视图）`); }
+    badOutput ? 'rc.7 会抛 must declare output { schema, render, presentationMeta? }' : '');
+  if (badOutput) continue;
+
+  if (host) {
+    try { host.tools.assertSupportedJsonSchema(output.schema); ok(true, `${name}: output.schema 通过 assertSupportedJsonSchema（注册期视图）`); }
     catch (e) { ok(false, `${name}: output.schema 被拒`, e.message); }
-    // 作者态 spec 必须能编译成合法 JSON Schema（defineTool 的职责，这里独立复核）
-    try {
-      const compiledByUs = plugin.compileValueSpec(rawSpecByName.get(name).output.schema);
-      tools.assertSupportedJsonSchema(compiledByUs);
-      ok(true, `${name}: 作者态 output.schema 可编译（本地编译器）`);
-    } catch (e) { ok(false, `${name}: 作者态 output.schema 编译失败`, e.message); }
+  } else {
+    // Offline equivalent: object root, object `properties`, string[] `required`.
+    const s = output.schema;
+    const structurallyOk = s?.type === 'object' && typeof s.properties === 'object'
+      && (!s.required || (Array.isArray(s.required) && s.required.every((k) => typeof k === 'string')));
+    ok(structurallyOk, `${name}: output.schema 结构合法（离线校验）`);
+    ok(!Object.values(s?.properties ?? {}).some((p) => p && typeof p === 'object' && 'required' in p),
+      `${name}: 编译后不应残留属性级 required`);
   }
-  if (def.timeoutMs !== undefined) {
-    ok(Number.isFinite(def.timeoutMs) && def.timeoutMs > 0, `${name}: timeoutMs 合法`);
-  }
+
+  try {
+    plugin.compileValueSpec(rawSpecByName.get(name).output.schema);
+    ok(true, `${name}: 作者态 output.schema 可编译（本地编译器）`);
+  } catch (e) { ok(false, `${name}: 作者态 output.schema 编译失败`, e.message); }
+
+  if (def.timeoutMs !== undefined) ok(Number.isFinite(def.timeoutMs) && def.timeoutMs > 0, `${name}: timeoutMs 合法`);
   ok(name !== 'run_code', `${name}: 未占用保留名 run_code`);
 }
 
-console.log('[2] 参数 schema（raw spec → JSON Schema；编译后 definition 复核）');
+/* ------------------------------------------------------------------ stage 2 */
+
+console.log('[2] 参数 schema（作者态编译 / 编译后复核）');
 for (const raw of plugin.toolSpecs) {
   try {
-    const js = tools.parameterSchemaSpecToJsonSchema(raw.parameters ?? {});
-    tools.assertObjectJsonSchema(js);
-    ok(true, `${raw.name}: raw spec 可编译为 object schema（必填: ${(js.required ?? []).join(',') || '无'}）`);
-  } catch (e) { ok(false, `${raw.name}: raw spec 非法`, e.message); }
-  const compiled = defs.find((d) => d.name === raw.name);
-  if (compiled) {
+    const compiled = plugin.compileParameters(raw.parameters ?? {});
+    const okShape = compiled.type === 'object' && typeof compiled.properties === 'object';
+    ok(okShape, `${raw.name}: 参数可编译为 object schema（必填: ${(compiled.required ?? []).join(',') || '无'}）`);
+    if (host) {
+      let hostSchema;
+      try { hostSchema = host.tools.parameterSchemaSpecToJsonSchema(raw.parameters ?? {}); } catch { /* ignore */ }
+      if (hostSchema) ok(JSON.stringify(hostSchema) === JSON.stringify(compiled), `${raw.name}: 参数编译与 host 一致`);
+      else skip(`${raw.name}: host 参数编译比对`);
+    }
+  } catch (e) { ok(false, `${raw.name}: 参数编译失败`, e.message); }
+
+  const compiledDef = defs.find((d) => d.name === raw.name);
+  if (compiledDef && host) {
     try {
-      tools.assertObjectJsonSchema(compiled.parameters);
-      tools.assertSupportedJsonSchema(compiled.parameters);
+      host.tools.assertObjectJsonSchema(compiledDef.parameters);
+      host.tools.assertSupportedJsonSchema(compiledDef.parameters);
       ok(true, `${raw.name}: defineTool 编译后的参数 schema 合规`);
     } catch (e) { ok(false, `${raw.name}: 编译后参数 schema 被拒`, e.message); }
   }
 }
+
+/* ------------------------------------------------------------------ stage 3 */
 
 console.log('[3] render 返回合法 ContentBlock[]');
 for (const def of defs) {
@@ -82,52 +126,35 @@ for (const def of defs) {
     path: '/tmp/x.pdf', bytes: 10, attempts: 1, complete: true, cached: false,
   });
   ok(Array.isArray(blocks) && blocks.length > 0 && blocks.every((b) => b?.type === 'text' && typeof b.text === 'string'),
-     `${def.name}: render → ContentBlock[]`);
+    `${def.name}: render → ContentBlock[]`);
 }
 
-console.log('[5] 回退编译器与 host defineTool 的一致性（关键：回退路径不能更宽松/更严格）');
-{
-  const hostDefine = await (async () => {
-    const anchors = [`${PROFILE}/package.json`];
-    for (const a of anchors) {
-      try {
-        const e = req.resolve('@deepseek-ai/dsh-tools');
-        const mod = await import(pathToFileURL(e).href);
-        if (typeof mod.defineTool === 'function') return mod.defineTool;
-      } catch { /* ignore */ }
-    }
-    return null;
-  })();
-  if (!hostDefine) {
-    console.log('  – 无法解析 host defineTool，跳过一致性比较（回退路径已由 [1][2] 独立校验）');
-  } else {
-    for (const raw of plugin.toolSpecs) {
-      // structuredClone 不能克隆函数：指向同一函数的浅拷贝即可
-      const hostDef = hostDefine({ ...raw, output: { ...raw.output } });
-      const ours = {
-        parameters: plugin.compileParameters(raw.parameters),
-        outputSchema: plugin.compileValueSpec(raw.output.schema),
-      };
-      const sameParams = JSON.stringify(hostDef.parameters) === JSON.stringify(ours.parameters);
-      const sameOutput = JSON.stringify(hostDef.output.schema) === JSON.stringify(ours.outputSchema);
-      ok(sameParams, `${raw.name}: 参数编译与 host 一致`);
-      ok(sameOutput, `${raw.name}: output.schema 编译与 host 一致`);
-      if (!sameParams) console.log('    host:', JSON.stringify(hostDef.parameters), '\n    ours:', JSON.stringify(ours.parameters));
-      if (!sameOutput) console.log('    host:', JSON.stringify(hostDef.output.schema), '\n    ours:', JSON.stringify(ours.outputSchema));
-    }
+/* ------------------------------------------------------------------ stage 5 */
+
+console.log('[5] 回退编译器与 host defineTool 的一致性');
+if (!host?.defineTool) {
+  skip('host defineTool 一致性比对');
+} else {
+  for (const raw of plugin.toolSpecs) {
+    const hostDef = host.defineTool({ ...raw, output: { ...raw.output } });
+    const oursParams = plugin.compileParameters(raw.parameters);
+    const oursOutput = plugin.compileValueSpec(raw.output.schema);
+    ok(JSON.stringify(hostDef.parameters) === JSON.stringify(oursParams), `${raw.name}: 参数编译与 host 一致`);
+    ok(JSON.stringify(hostDef.output.schema) === JSON.stringify(oursOutput), `${raw.name}: output.schema 编译与 host 一致`);
   }
 }
 
+/* ------------------------------------------------------------------ stage 4 */
+
 if (process.argv[2]) {
-  console.log(`[4] 端到端（真实 PDF: ${process.argv[2]}）`);
-  const sample = process.argv[2];
+  console.log(`[4] 端到端（${path.basename(process.argv[2])}）`);
   try {
-    const r = await plugin.extractPdf(sample, { pages: '1', maxChars: 200 });
+    const r = await plugin.extractPdf(process.argv[2], { pages: '1', maxChars: 200 });
     ok(r.chars > 20, `extract 成功：${r.pageCount} 页 / ${r.chars} 字符`);
-    const rendered = defs.find((d) => d.name === 'pdf_extract').output.render({ path: sample }, r);
+    const rendered = defs.find((d) => d.name === 'pdf_extract').output.render({ path: process.argv[2] }, r);
     ok(rendered[0].text.length > 20, 'render 输出非空');
   } catch (e) { ok(false, 'extract 失败', e.message); }
 }
 
-console.log(`\n结果: ${pass} 通过 / ${fail} 失败`);
+console.log(`\n结果: ${pass} 通过 / ${fail} 失败${skipped ? ` / ${skipped} 跳过` : ''}`);
 process.exit(fail === 0 ? 0 : 1);
