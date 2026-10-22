@@ -1,4 +1,4 @@
-# dsh-tool-pdf
+# @rrdongdong/dsh-pdf
 
 给 DSH 用的两个工具：`pdf_fetch`（带断点续传与完整性校验的下载）与 `pdf_extract`（PDF 正文抽取）。
 存在理由：CVPR/CVF 与部分 IEEE 论文的 PDF 使用**子集化 CID 字体 + 压缩对象流（/ObjStm）**，
@@ -14,17 +14,17 @@
 
 ```bash
 # 1) 依赖（已在本目录完成）
-cd ~/.dsh/plugins/dsh-tool-pdf && npm i
+cd ~/.dsh/plugins/dsh-pdf && npm i
 
 # 2) 让 profile 能解析到本包（用符号链接，避免 npm 重写 profile 的依赖树）
-ln -s ~/.dsh/plugins/dsh-tool-pdf ~/.dsh/profiles/web/node_modules/dsh-tool-pdf
+ln -s ~/.dsh/plugins/dsh-pdf ~/.dsh/profiles/web/node_modules/@rrdongdong/dsh-pdf
 
 # 3) 在 profile 的 patch 里插入一行（先备份）
 cp ~/.dsh/profiles/web/cordis.patch.yml ~/.dsh/profiles/web/cordis.patch.yml.bak
 cat >> ~/.dsh/profiles/web/cordis.patch.yml <<'YAML'
 - insert:
     - id: tool-pdf
-      name: 'dsh-tool-pdf'
+      name: '@rrdongdong/dsh-pdf'
 YAML
 ```
 

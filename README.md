@@ -1,7 +1,10 @@
-# dsh-tool-pdf
+# @rrdongdong/dsh-pdf
 
 [![CI](https://github.com/rrdongdong/dsh-tool-pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/rrdongdong/dsh-tool-pdf/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+> **Not affiliated with DeepSeek.** "DeepSeek Harness (DSH)" and "Cordis" are used
+> descriptively; this is a community plugin, not an official package.
 
 Two [DSH](https://github.com/deepseek-ai/deepseek-harness) (Cordis) tools for reading papers:
 **`pdf_fetch`** — resumable, integrity-checked download; **`pdf_extract`** — text extraction that
@@ -46,18 +49,20 @@ a named `NODE_TOO_OLD` error instead of failing deep inside pdfjs. Consumers stu
 
 ```bash
 # 1) clone + deps
-git clone <this repo> ~/.dsh/plugins/dsh-tool-pdf
-cd ~/.dsh/plugins/dsh-tool-pdf && npm ci --omit=dev
+git clone https://github.com/rrdongdong/dsh-tool-pdf.git ~/.dsh/plugins/dsh-pdf
+cd ~/.dsh/plugins/dsh-pdf && npm ci --omit=dev
 
-# 2) make it resolvable from the profile — symlink, so npm never rewrites the profile tree
-ln -sfn ~/.dsh/plugins/dsh-tool-pdf ~/.dsh/profiles/web/node_modules/dsh-tool-pdf
+# 2) make it resolvable from the profile — symlink, so npm never rewrites the profile tree.
+#    The scoped name needs the @scope directory to exist first.
+mkdir -p ~/.dsh/profiles/web/node_modules/@rrdongdong
+ln -sfn ~/.dsh/plugins/dsh-pdf ~/.dsh/profiles/web/node_modules/@rrdongdong/dsh-pdf
 
 # 3) add one row to the profile patch (back it up first)
 cp ~/.dsh/profiles/web/cordis.patch.yml ~/.dsh/profiles/web/cordis.patch.yml.bak
 cat >> ~/.dsh/profiles/web/cordis.patch.yml <<'YAML'
 - insert:
     - id: tool-pdf
-      name: 'dsh-tool-pdf'
+      name: '@rrdongdong/dsh-pdf'
       # optional — all keys shown with their defaults:
       # config:
       #   cacheDir: /tmp/dsh-pdf-cache
@@ -73,6 +78,10 @@ dsh --profile web --dump-config | grep -A2 'id: tool-pdf'
 
 # 5) restart the host
 ```
+
+> Installing from npm instead (`npm i @rrdongdong/dsh-pdf`) works too, but the plugin must be
+> resolvable from the **profile's** `node_modules` — a symlink into
+> `~/.dsh/profiles/web/node_modules/@rrdongdong/` is the least invasive way.
 
 ### Never restart blind
 
@@ -141,7 +150,7 @@ Unknown keys are rejected.
 ```yaml
 - insert:
     - id: tool-pdf
-      name: 'dsh-tool-pdf'
+      name: '@rrdongdong/dsh-pdf'
       config:
         cacheDir: /var/tmp/dsh-pdf-cache
         defaultMaxChars: 120000

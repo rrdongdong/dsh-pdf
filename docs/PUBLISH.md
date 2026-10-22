@@ -8,7 +8,7 @@
 仓库里目前是 `OWNER` 占位符（3 处，都在 `package.json`）：
 
 ```bash
-cd ~/.dsh/plugins/dsh-tool-pdf
+cd ~/.dsh/plugins/dsh-pdf
 YOUR_GH=your-github-username          # ← 改成你的账号
 sed -i "s/OWNER/$YOUR_GH/g" package.json README.md
 grep -n "$YOUR_GH" package.json        # 确认替换
@@ -34,7 +34,7 @@ gh auth status                                    # 若用 gh，需已登录你�
 ## 2. 本地首次提交（已在别处做过可跳过）
 
 ```bash
-cd ~/.dsh/plugins/dsh-tool-pdf
+cd ~/.dsh/plugins/dsh-pdf
 git init -b main
 git add -A
 git commit -m "feat: pdf_fetch + pdf_extract tools for DSH (CID/ObjStm-safe)
@@ -49,7 +49,7 @@ git commit -m "feat: pdf_fetch + pdf_extract tools for DSH (CID/ObjStm-safe)
 ## 3. 建远端并推送
 
 **用网页建**（不需要凭据）：
-1. github.com → New repository → 名称 `dsh-tool-pdf` → **不要**勾选初始化 README
+1. github.com → New repository → 名称 `@rrdongdong/dsh-pdf` → **不要**勾选初始化 README
 2. 然后：
 ```bash
 git remote add origin git@github.com:$YOUR_GH/dsh-tool-pdf.git   # 或 https://...
@@ -58,14 +58,14 @@ git push -u origin main
 
 **或用 gh CLI**（需你先 `gh auth login` 到你自己的账号）：
 ```bash
-gh repo create dsh-tool-pdf --public --source=. --remote=origin --push
+gh repo create @rrdongdong/dsh-pdf --public --source=. --remote=origin --push
 ```
 
 > ⚠️ `--public` 会立刻公开。若想先私有：`--private`，确认无误再改可见性。
 
 ## 4. 可选：发到 npm
 
-**只有在你想让别人 `npm i dsh-tool-pdf` 时才做**。`package.json` 已含 `publishConfig.access=public`。
+**只有在你想让别人 `npm i @rrdongdong/dsh-pdf` 时才做**。`package.json` 已含 `publishConfig.access=public`。
 
 ```bash
 npm whoami                 # 确认登录的是你的 npm 账号

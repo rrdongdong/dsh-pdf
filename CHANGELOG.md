@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.0 — 2026-10-22
+
+**Renamed** to a scoped package: `dsh-tool-pdf` → **`@rrdongdong/dsh-pdf`**.
+
+Why rename (both reasons are real, not cosmetic):
+- The DSH plugin directory already lists a **different** `dsh-tool-pdf` plugin
+  (`pdf_info` / `pdf_extract` / `pdf_render`), so the unscoped name was ambiguous in search results
+  and would collide with an existing ecosystem entry.
+- `dsh-tool-*` is the naming pattern of the **official** `@deepseek-ai/dsh-tool-*` packages
+  (`tool-bash`, `tool-fs`, `tool-web`, …). An unscoped `dsh-tool-pdf` reads as first-party.
+
+The install dir is now `~/.dsh/plugins/dsh-pdf` and the loader row is `@rrdongdong/dsh-pdf`
+(the scoped name needs `node_modules/@rrdongdong/` to exist — the README says so).
+
+### Added
+- README: explicit "Not affiliated with DeepSeek" notice; "DSH" and "Cordis" are described as
+  descriptive references, not marks of endorsement.
+
+### Note on prior art
+Other PDF tools exist in this ecosystem (e.g. `zhtx2024/dsh-pdf`, also pdfjs-based) and elsewhere.
+This project claims no novel *function* — PDF text extraction is decades old. Its own contribution is
+the integrity discipline around it: `%%EOF` truncation detection, resumable/verified download, and a
+registration-time preflight that stops a bad tool definition from taking the host down at boot.
+
 ## 0.3.3 — 2026-10-22
 
 ### Changed
