@@ -1,6 +1,6 @@
 {
   "name": "dsh-tool-pdf",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "DSH/Cordis tools for reading papers: resumable PDF download + text extraction that survives subsetted CID fonts and compressed object streams",
   "type": "module",
   "main": "lib/index.js",

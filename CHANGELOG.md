@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.2 — 2026-10-22
+
+### Fixed
+- **`package-lock.json` version drifted** to 0.2.1 while `package.json` was at 0.3.1. `npm ci` tolerates
+  it, but every `npm install` rewrote the lockfile and a reviewer diffing the release would see a
+  mismatch. Regenerated (`npm install --package-lock-only`); both now report 0.3.1.
+
+### Added
+- `test/metadata.test.mjs` — five release-metadata assertions so this class of drift fails CI:
+  lockfile versions match `package.json`; every `resolved` host is a public registry; `files` covers
+  the documents we promise to ship; `engines.node` is not below `pdfjs-dist`'s own floor; no `OWNER`
+  placeholder is left in shipped metadata.
+
 ## 0.3.1 — 2026-10-22
 
 Documentation and compliance pass (no behaviour change).
