@@ -1,6 +1,6 @@
 # @rrdongdong/dsh-pdf
 
-[![CI](https://github.com/rrdongdong/dsh-tool-pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/rrdongdong/dsh-tool-pdf/actions/workflows/ci.yml)
+[![CI](https://github.com/rrdongdong/dsh-pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/rrdongdong/dsh-pdf/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 > **Not affiliated with DeepSeek.** "DeepSeek Harness (DSH)" and "Cordis" are used
@@ -49,7 +49,7 @@ a named `NODE_TOO_OLD` error instead of failing deep inside pdfjs. Consumers stu
 
 ```bash
 # 1) clone + deps
-git clone https://github.com/rrdongdong/dsh-tool-pdf.git ~/.dsh/plugins/dsh-pdf
+git clone https://github.com/rrdongdong/dsh-pdf.git ~/.dsh/plugins/dsh-pdf
 cd ~/.dsh/plugins/dsh-pdf && npm ci --omit=dev
 
 # 2) make it resolvable from the profile — symlink, so npm never rewrites the profile tree.

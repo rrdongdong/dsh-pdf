@@ -1,5 +1,8 @@
 # 发布清单
 
+> **现状**：仓库已发布为 `rrdongdong/dsh-pdf`（原 `dsh-tool-pdf` 已重命名，GitHub 自动重定向旧 URL）。
+> 本文档保留完整的首次发布流程，供再次发布或他人复用时参考。
+
 > **没有任何东西会自动发布。** 本仓库只在你本地：不联网、不推送、不 `npm publish`。
 > 每一条命令都需要你亲自执行，且发布到哪个账号完全由你决定。
 
@@ -24,7 +27,7 @@ gh auth status                                    # 若用 gh，需已登录你�
 
 | 方案 | 适合 | 说明 |
 |---|---|---|
-| **A. 你自己的个人仓库** | 想作为个人作品/长期维护 | `github.com/<你>/dsh-tool-pdf` |
+| **A. 你自己的个人仓库** | 想作为个人作品/长期维护 | `github.com/<你>/dsh-pdf` |
 | **B. 你的组织仓库** | 有实验室/团队组织 | 同上，换 org |
 | **C. 直接给上游提 PR** | 只想要"被 DSH 收录" | 先 fork `deepseek-ai/deepseek-harness`，插件是否接受进主仓取决于维护者；**同时**按 A 建自己的仓库更稳 |
 
@@ -52,7 +55,7 @@ git commit -m "feat: pdf_fetch + pdf_extract tools for DSH (CID/ObjStm-safe)
 1. github.com → New repository → 名称 `@rrdongdong/dsh-pdf` → **不要**勾选初始化 README
 2. 然后：
 ```bash
-git remote add origin git@github.com:$YOUR_GH/dsh-tool-pdf.git   # 或 https://...
+git remote add origin git@github.com:$YOUR_GH/dsh-pdf.git   # 或 https://...
 git push -u origin main
 ```
 
@@ -94,7 +97,7 @@ Body:
 
 ```bash
 # 干净克隆能否自洽？
-cd /tmp && git clone https://github.com/$YOUR_GH/dsh-tool-pdf.git probe && cd probe
+cd /tmp && git clone https://github.com/$YOUR_GH/dsh-pdf.git probe && cd probe
 npm ci && npm test && npm run preflight -- ./fixtures/sample.pdf
 ```
 

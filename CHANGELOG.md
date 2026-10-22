@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1 — 2026-10-22
+
+### Changed
+- Upstream repository renamed `dsh-tool-pdf` → **`dsh-pdf`** (GitHub redirects the old URL).
+  All in-repo URLs, `repository` / `bugs` / `homepage` metadata and the publish checklist follow.
+- `package.json#description` now matches the GitHub About text verbatim (pain-point first:
+  "PDF text extraction that survives CID/ObjStm fonts"), keeping the three places that describe this
+  package in agreement.
+
 ## 0.4.0 — 2026-10-22
 
 **Renamed** to a scoped package: `dsh-tool-pdf` → **`@rrdongdong/dsh-pdf`**.

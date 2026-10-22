@@ -1,7 +1,7 @@
 {
   "name": "@rrdongdong/dsh-pdf",
-  "version": "0.4.0",
-  "description": "DSH/Cordis tools: resumable PDF download + CID/ObjStm-safe text extraction",
+  "version": "0.4.1",
+  "description": "PDF text extraction that survives CID/ObjStm fonts (CVPR/IEEE PDFs) — DSH/Cordis tools",
   "keywords": [
     "dsh",
     "cordis",
@@ -40,12 +40,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rrdongdong/dsh-tool-pdf.git"
+    "url": "git+https://github.com/rrdongdong/dsh-pdf.git"
   },
   "bugs": {
-    "url": "https://github.com/rrdongdong/dsh-tool-pdf/issues"
+    "url": "https://github.com/rrdongdong/dsh-pdf/issues"
   },
-  "homepage": "https://github.com/rrdongdong/dsh-tool-pdf#readme",
+  "homepage": "https://github.com/rrdongdong/dsh-pdf#readme",
   "dependencies": {
     "pdfjs-dist": "6.4.299"
   },
