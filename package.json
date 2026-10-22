@@ -1,15 +1,7 @@
 {
   "name": "dsh-tool-pdf",
-  "version": "0.3.2",
-  "description": "DSH/Cordis tools for reading papers: resumable PDF download + text extraction that survives subsetted CID fonts and compressed object streams",
-  "type": "module",
-  "main": "lib/index.js",
-  "exports": {
-    ".": "./lib/index.js"
-  },
-  "dependencies": {
-    "pdfjs-dist": "6.4.299"
-  },
+  "version": "0.3.3",
+  "description": "DSH/Cordis tools: resumable PDF download + CID/ObjStm-safe text extraction",
   "keywords": [
     "dsh",
     "cordis",
@@ -21,7 +13,13 @@
     "objstm",
     "tool"
   ],
+  "author": "yedongheng",
   "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js"
+  },
   "files": [
     "lib/",
     "bin/",
@@ -48,6 +46,9 @@
     "url": "https://github.com/rrdongdong/dsh-tool-pdf/issues"
   },
   "homepage": "https://github.com/rrdongdong/dsh-tool-pdf#readme",
+  "dependencies": {
+    "pdfjs-dist": "6.4.299"
+  },
   "peerDependencies": {
     "@deepseek-ai/dsh-tools": "*"
   },

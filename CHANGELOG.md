@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.3 — 2026-10-22
+
+### Changed
+- LICENSE copyright holder is now **yedongheng** (was the generic
+  "dsh-tool-pdf contributors"), and `package.json` gained a matching `author` field.
+- `package.json#description` now matches the GitHub repository description verbatim, so the three
+  places that describe this package (GitHub About, package.json, README) no longer drift.
+
 ## 0.3.2 — 2026-10-22
 
 ### Fixed
